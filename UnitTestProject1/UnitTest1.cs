@@ -101,5 +101,20 @@ namespace UnitTestProject1
             var Tokens = myCalculator.GetTokens("2-4-(8+2-6+(8+4-(1)+8-10))");
             Assert.AreEqual(-15, myCalculator.EvaluateExpression(Tokens));
         }
+        [TestMethod]
+        public void TestMethod14()
+        {
+            MyCalculator myCalculator = new MyCalculator();
+            var Tokens = myCalculator.GetTokens("2^3");
+            Assert.AreEqual(8, myCalculator.EvaluateExpression(Tokens));
+        }
+        [TestMethod]
+        public void TestMethod15()
+        {
+            MyCalculator myCalculator = new MyCalculator();
+            var Tokens = myCalculator.GetTokens("1+2^3*2-(5*2)");
+            Assert.AreEqual(7, myCalculator.EvaluateExpression(Tokens));
+        }
+
     }
 }
