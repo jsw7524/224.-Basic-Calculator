@@ -8,6 +8,13 @@ namespace UnitTestProject1
     public class UnitTest1
     {
         [TestMethod]
+        public void TestMethod0()
+        {
+            MyCalculator myCalculator = new MyCalculator();
+            var Tokens = myCalculator.GetTokens("1+2^30");
+            Assert.AreEqual(5, Tokens.Count);
+        }
+        [TestMethod]
         public void TestMethod1()
         {
             MyCalculator myCalculator = new MyCalculator();
@@ -114,6 +121,27 @@ namespace UnitTestProject1
             MyCalculator myCalculator = new MyCalculator();
             var Tokens = myCalculator.GetTokens("1+2^3*2-(5*2)");
             Assert.AreEqual(7, myCalculator.EvaluateExpression(Tokens));
+        }
+        [TestMethod]
+        public void TestMethod16()
+        {
+            MyCalculator myCalculator = new MyCalculator();
+            var Tokens = myCalculator.GetTokens("1+2^10");
+            Assert.AreEqual(1025, myCalculator.EvaluateExpression(Tokens));
+        }
+        [TestMethod]
+        public void TestMethod17()
+        {
+            MyCalculator myCalculator = new MyCalculator();
+            var Tokens = myCalculator.GetTokens("15%4");
+            Assert.AreEqual(3, myCalculator.EvaluateExpression(Tokens));
+        }
+        [TestMethod]
+        public void TestMethod18()
+        {
+            MyCalculator myCalculator = new MyCalculator();
+            var Tokens = myCalculator.GetTokens("(2+3*5)%4");
+            Assert.AreEqual(1, myCalculator.EvaluateExpression(Tokens));
         }
 
     }

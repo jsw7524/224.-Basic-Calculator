@@ -33,12 +33,12 @@ namespace _224.Basic_Calculator
     {
         public Dictionary<string, int> precedenceTable = new Dictionary<string, int>
         {
-            {"+",1},{"-",1},{"*",2},{"/",2},{"^",3},{"(",1000},{")",-1000}
+            {"+",1},{"-",1},{"*",2},{"/",2},{"%",2},{"^",3},{"(",1000},{")",-1000}
         };
 
         public List<Token> GetTokens(string input)
         {
-            Regex regex = new Regex(@"(?<val>\d+)|(?<op>\+|\-|\*|\\|\(|\)|\^)");
+            Regex regex = new Regex(@"(?<val>\d+)|(?<op>\+|\-|\*|\\|\(|\)|\^|%)");
             var mc = regex.Matches(input.Replace(" ", ""));
             List<Token> result = new List<Token>();
             foreach (Match m in mc)
@@ -81,6 +81,9 @@ namespace _224.Basic_Calculator
                         break;
                     case "/":
                         valStack.Push(new Token(a / b));
+                        break;
+                    case "%":
+                        valStack.Push(new Token(a % b));
                         break;
                     case "^":
                         valStack.Push(new Token((decimal)Math.Pow((double)a, (double)b)));
