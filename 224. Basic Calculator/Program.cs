@@ -59,11 +59,13 @@ namespace _224.Basic_Calculator
 
         private void Compute(Token t, Stack<Token> opStack, Stack<Token> valStack)
         {
-            while (precedenceTable[t.op] <= precedenceTable[opStack.Peek().op] )
+            if (opStack.Count == 0)
+                return;
+            if (valStack.Count == 0)
+                return;
+            while (precedenceTable[t.op] <= precedenceTable[opStack.Peek().op] && (opStack.Peek().op != "("))
             {
                 Token opToken = opStack.Pop();
-                if (opToken.op == "(")
-                    return;
                 Decimal b = valStack.Pop().val;
                 Decimal a = valStack.Pop().val;
                 switch (opToken.op)
@@ -91,29 +93,27 @@ namespace _224.Basic_Calculator
             Stack<Token> opStack = new Stack<Token>();
             Stack<Token> valStack = new Stack<Token>();
 
-            if (tokens.FirstOrDefault().tkType == TokenType.OP)
-                opStack.Push(tokens.FirstOrDefault());
-            else
-                valStack.Push(tokens.FirstOrDefault());
-
-            foreach (Token t in tokens.Skip(1))
+            foreach (Token t in tokens)
             {
                 if (t.tkType == TokenType.OP)
                 {
-                    if (valStack.Count >= 2)
-                        Compute(t, opStack, valStack);
-                    if (t.op != ")")
-                        opStack.Push(t);
+                    Compute(t, opStack, valStack);
+                    if (opStack.Count > 0 && (opStack.Peek().op == "(" && t.op == ")"))
+                    {
+                        opStack.Pop();
+                        continue;
+                    }
+                    opStack.Push(t);
                 }
                 else if (t.tkType == TokenType.Val)
                 {
                     valStack.Push(t);
                 }
             }
+
             while (opStack.Count > 0)
             {
-                Token t = opStack.Peek();
-                Compute(t, opStack, valStack);
+                Compute(opStack.Peek(), opStack, valStack);
             }
             return valStack.FirstOrDefault().val;
         }

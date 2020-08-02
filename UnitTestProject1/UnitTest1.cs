@@ -94,6 +94,12 @@ namespace UnitTestProject1
             Assert.AreEqual(10, myCalculator.EvaluateExpression(Tokens));
         }
 
-
+        [TestMethod]
+        public void TestMethod13()
+        {
+            MyCalculator myCalculator = new MyCalculator();
+            var Tokens = myCalculator.GetTokens("2-4-(8+2-6+(8+4-(1)+8-10))");
+            Assert.AreEqual(-15, myCalculator.EvaluateExpression(Tokens));
+        }
     }
 }
