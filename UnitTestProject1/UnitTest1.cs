@@ -143,6 +143,44 @@ namespace UnitTestProject1
             var Tokens = myCalculator.GetTokens("(2+3*5)%4");
             Assert.AreEqual(1, myCalculator.EvaluateExpression(Tokens));
         }
+        [TestMethod]
+        public void TestMethod19()
+        {
+            MyCalculator myCalculator = new MyCalculator();
+            var Tokens = myCalculator.GetTokens("a=1");
+            Assert.AreEqual(1, myCalculator.EvaluateExpression(Tokens));
+        }
+        [TestMethod]
+        public void TestMethod20()
+        {
+            MyCalculator myCalculator = new MyCalculator();
+            var Tokens1 = myCalculator.GetTokens("a=1");
+            var Tokens2 = myCalculator.GetTokens("2+a");
+            myCalculator.EvaluateExpression(Tokens1);
+            Assert.AreEqual(3, myCalculator.EvaluateExpression(Tokens2));
+        }
+
+        [TestMethod]
+        public void TestMethod21()
+        {
+            MyCalculator myCalculator = new MyCalculator();
+            var Tokens1 = myCalculator.GetTokens("a7=1 + 2 ^ 3 * 2 - (5 * 2)");
+            var Tokens2 = myCalculator.GetTokens("(1 + (43+ a7 + 515 + 2) - 35) + (26 + 8)+a7");
+            myCalculator.EvaluateExpression(Tokens1);
+            Assert.AreEqual(574, myCalculator.EvaluateExpression(Tokens2));
+        }
+
+        [TestMethod]
+        public void TestMethod22()
+        {
+            MyCalculator myCalculator = new MyCalculator();
+            var Tokens1 = myCalculator.GetTokens("a7=1 + 2 ^ 3 * 2 - (5 * 2)");
+            var Tokens2 = myCalculator.GetTokens("a574=(1 + (43+ a7 + 515 + 2) - 35) + (26 + 8)+a7");
+            var Tokens3 = myCalculator.GetTokens("a595=a574 + 3*a7");
+            myCalculator.EvaluateExpression(Tokens1);
+            myCalculator.EvaluateExpression(Tokens2);
+            Assert.AreEqual(595, myCalculator.EvaluateExpression(Tokens3));
+        }
 
     }
 }

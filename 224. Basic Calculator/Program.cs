@@ -10,7 +10,8 @@ namespace _224.Basic_Calculator
     public enum TokenType
     {
         OP,
-        Val
+        Val,
+        Var
     }
     public class Token
     {
@@ -27,18 +28,27 @@ namespace _224.Basic_Calculator
             op = s;
             tkType = TokenType.OP;
         }
+        public Token(string variableName, decimal value)
+        {
+            op = variableName;
+            val = value;
+            tkType = TokenType.Var;
+        }
     }
 
     public class MyCalculator
     {
         public Dictionary<string, int> precedenceTable = new Dictionary<string, int>
         {
-            {"+",1},{"-",1},{"*",2},{"/",2},{"%",2},{"^",3},{"(",1000},{")",-1000}
+            {"+",1},{"-",1},{"*",2},{"/",2},{"%",2},{"^",3},{"(",1000},{")",-1000},{"=",0}
         };
+
+        public Dictionary<string, Decimal> symbolTable = new Dictionary<string, Decimal>();
 
         public List<Token> GetTokens(string input)
         {
-            Regex regex = new Regex(@"(?<val>\d+)|(?<op>\+|\-|\*|\\|\(|\)|\^|%)");
+            Regex regex = new Regex(@"(?<val>\d+)|(?<op>\+|\-|\*|\\|\(|\)|\^|%|=)|(?<var>[A-Za-z]\w*)");
+
             var mc = regex.Matches(input.Replace(" ", ""));
             List<Token> result = new List<Token>();
             foreach (Match m in mc)
@@ -48,6 +58,10 @@ namespace _224.Basic_Calculator
                 {
                     token = new Token(m.Value);
                 }
+                else if (m.Groups["var"].Success)
+                {
+                    token = new Token(m.Value,0);
+                }
                 else
                 {
                     token = new Token(Decimal.Parse(m.Value));
@@ -55,6 +69,16 @@ namespace _224.Basic_Calculator
                 result.Add(token);
             }
             return result;
+        }
+
+        private Decimal GetValue(Stack<Token> valStack)
+        {
+            var v = valStack.Pop();
+            if (v.tkType == TokenType.Val)
+                return v.val;
+            if (v.tkType == TokenType.Var)
+                return symbolTable[v.op];
+            throw new Exception("fail to get value ");
         }
 
         private void Compute(Token t, Stack<Token> opStack, Stack<Token> valStack)
@@ -66,8 +90,18 @@ namespace _224.Basic_Calculator
             while (opStack.Count > 0 && precedenceTable[t.op] <= precedenceTable[opStack.Peek().op] && (opStack.Peek().op != "("))
             {
                 Token opToken = opStack.Pop();
-                Decimal b = valStack.Pop().val;
-                Decimal a = valStack.Pop().val;
+                if (opToken.op == "=")
+                {
+                    var d = GetValue(valStack);
+                    var varToken = valStack.Pop();
+                    var varName = varToken.op;
+                    symbolTable[varName] = d;
+                    varToken.val = d;
+                    valStack.Push(varToken);
+                    return;
+                }
+                Decimal b = GetValue(valStack);
+                Decimal a = GetValue(valStack);
                 switch (opToken.op)
                 {
                     case "+":
@@ -109,17 +143,16 @@ namespace _224.Basic_Calculator
                     }
                     opStack.Push(t);
                 }
-                else if (t.tkType == TokenType.Val)
+                else
                 {
                     valStack.Push(t);
                 }
             }
-
             while (opStack.Count > 0)
             {
                 Compute(opStack.Peek(), opStack, valStack);
             }
-            return valStack.FirstOrDefault().val;
+            return GetValue(valStack);
         }
     }
 
@@ -137,9 +170,10 @@ namespace _224.Basic_Calculator
     {
         static void Main(string[] args)
         {
-            MyCalculator myCalculator = new MyCalculator();
-            var Tokens = myCalculator.GetTokens("2-4-(8+2-6+(8+4-(1)+8-10))");
-            myCalculator.EvaluateExpression(Tokens);
+            //Example
+            //MyCalculator myCalculator = new MyCalculator();
+            //var Tokens = myCalculator.GetTokens("2-4-(8+2-6+(8+4-(1)+8-10))");
+            //myCalculator.EvaluateExpression(Tokens);
         }
     }
 }
