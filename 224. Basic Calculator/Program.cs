@@ -47,7 +47,7 @@ namespace _224.Basic_Calculator
 
         public List<Token> GetTokens(string input)
         {
-            Regex regex = new Regex(@"(?<val>\d+)|(?<op>\+|\-|\*|\\|\(|\)|\^|%|=)|(?<var>[A-Za-z]\w*)");
+            Regex regex = new Regex(@"(?<val>\d+(\.\d+)?)|(?<op>\+|\-|\*|\\|\(|\)|\^|%|=)|(?<var>[A-Za-z]\w*)");
 
             var mc = regex.Matches(input.Replace(" ", ""));
             List<Token> result = new List<Token>();

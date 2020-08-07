@@ -182,5 +182,29 @@ namespace UnitTestProject1
             Assert.AreEqual(595, myCalculator.EvaluateExpression(Tokens3));
         }
 
+        [TestMethod]
+        public void TestMethod23()
+        {
+            MyCalculator myCalculator = new MyCalculator();
+            var Tokens1 = myCalculator.GetTokens("1.5+2.1");
+            myCalculator.EvaluateExpression(Tokens1);
+            Assert.AreEqual(3.6m, myCalculator.EvaluateExpression(Tokens1));
+        }
+
+        [TestMethod]
+        public void TestMethod24()
+        {
+            MyCalculator myCalculator = new MyCalculator();
+            var Tokens = myCalculator.GetTokens("1*(1.349+2.33)*0.3-1.0*4");
+            Assert.AreEqual(-2.8963m, myCalculator.EvaluateExpression(Tokens));
+        }
+
+        [TestMethod]
+        public void TestMethod25()
+        {
+            MyCalculator myCalculator = new MyCalculator();
+            var Tokens = myCalculator.GetTokens("2.0^3.5");
+            Assert.AreEqual(11.3137084989848m, myCalculator.EvaluateExpression(Tokens));
+        }
     }
 }
