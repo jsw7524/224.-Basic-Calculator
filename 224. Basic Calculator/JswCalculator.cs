@@ -40,8 +40,11 @@ namespace _224.Basic_Calculator
                                                 tokens[1].val = GetValue(tokens[0]);
                                                 return tokens[1];
                                             }  } },
+              { "NEG", new CalFunction { name="NEG", precedence=4,operandNumber=1,f=tokens=>new Token(-1*tokens[0].val)} },
+              { "ABS", new CalFunction { name="ABS", precedence=4,operandNumber=1,f=tokens=>new Token(Math.Abs(tokens[0].val))} },
+              { "SQRT", new CalFunction { name="SQRT", precedence=4,operandNumber=1,f=tokens=>new Token((decimal)Math.Sqrt((double)tokens[0].val))} },
             };
-            this.tokenPattern = tokenPattern ?? @"(?<val>\d+(\.\d+)?)|(?<op>\+|\-|\*|\\|\(|\)|\^|%|=)|(?<var>[A-Za-z]\w*)";
+            this.tokenPattern = tokenPattern ?? @"(?<val>\d+(\.\d+)?)|(?<op>\+|\-|\*|\\|\(|\)|\^|%|=)|(?<var>[a-z]\w*)|(?<func>[A-Z]+)";
             this.symbolTable = symbolTable ?? new Dictionary<string, Decimal>();
         }
 
@@ -55,7 +58,7 @@ namespace _224.Basic_Calculator
             foreach (Match m in mc)
             {
                 Token token = null;
-                if (m.Groups["op"].Success)
+                if (m.Groups["op"].Success || m.Groups["func"].Success)
                 {
                     token = new Token(m.Value);
                 }

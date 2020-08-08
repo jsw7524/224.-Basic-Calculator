@@ -257,5 +257,48 @@ namespace UnitTestProject1
             JswCalculator jswCalculator = new JswCalculator(null, syntax, null);
             var Tokens = jswCalculator.GetTokens("1.0+2.0*3.0+4");
         }
+
+        [TestMethod]
+        public void TestMethod31()
+        {
+            JswCalculator jswCalculator = new JswCalculator();
+            var Tokens = jswCalculator.GetTokens("NEG(3)");
+            Assert.AreEqual(-3m, jswCalculator.EvaluateExpression(Tokens));
+        }
+        [TestMethod]
+        public void TestMethod32()
+        {
+            JswCalculator jswCalculator = new JswCalculator();
+            var Tokens = jswCalculator.GetTokens("10+2*NEG(3)");
+            Assert.AreEqual(4m, jswCalculator.EvaluateExpression(Tokens));
+        }
+        [TestMethod]
+        public void TestMethod33()
+        {
+            JswCalculator jswCalculator = new JswCalculator();
+            var Tokens = jswCalculator.GetTokens("ABS(NEG(3))");
+            Assert.AreEqual(3m, jswCalculator.EvaluateExpression(Tokens));
+        }
+        [TestMethod]
+        public void TestMethod34()
+        {
+            JswCalculator jswCalculator = new JswCalculator();
+            var Tokens = jswCalculator.GetTokens("5*ABS(6-NEG(10))");
+            Assert.AreEqual(80m, jswCalculator.EvaluateExpression(Tokens));
+        }
+        [TestMethod]
+        public void TestMethod35()
+        {
+            JswCalculator jswCalculator = new JswCalculator();
+            var Tokens = jswCalculator.GetTokens("SQRT(16)");
+            Assert.AreEqual(4m, jswCalculator.EvaluateExpression(Tokens));
+        }
+        [TestMethod]
+        public void TestMethod36()
+        {
+            JswCalculator jswCalculator = new JswCalculator();
+            var Tokens = jswCalculator.GetTokens("1+SQRT(16)*2");
+            Assert.AreEqual(9m, jswCalculator.EvaluateExpression(Tokens));
+        }
     }
 }
