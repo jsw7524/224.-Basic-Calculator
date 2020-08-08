@@ -6,14 +6,6 @@ using System.Text.RegularExpressions;
 
 namespace _224.Basic_Calculator
 {
-    public class CalFunction
-    {
-        public string name;
-        public int precedence;
-        public int operandNumber;
-        public Func<List<Token>, Token> f;
-    }
-
     public class JswCalculator
     {
         private Dictionary<string, CalFunction> precedenceTable;
