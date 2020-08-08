@@ -155,21 +155,16 @@ namespace UnitTestProject1
         public void TestMethod20()
         {
             JswCalculator jswCalculator = new JswCalculator();
-            var Tokens1 = jswCalculator.GetTokens("a=1");
-            jswCalculator.EvaluateExpression(Tokens1);
-            var Tokens2 = jswCalculator.GetTokens("2+a");
-            Assert.AreEqual(3, jswCalculator.EvaluateExpression(Tokens2));
+            jswCalculator.EvaluateExpression("a=1");
+            Assert.AreEqual(3, jswCalculator.EvaluateExpression("2+a"));
         }
 
         [TestMethod]
         public void TestMethod21()
         {
             JswCalculator jswCalculator = new JswCalculator();
-            var Tokens1 = jswCalculator.GetTokens("a7=1 + 2 ^ 3 * 2 - (5 * 2)");
-            jswCalculator.EvaluateExpression(Tokens1);
-            var Tokens2 = jswCalculator.GetTokens("(1 + (43+ a7 + 515 + 2) - 35) + (26 + 8)+a7");
-            
-            Assert.AreEqual(574, jswCalculator.EvaluateExpression(Tokens2));
+            jswCalculator.EvaluateExpression("a7=1 + 2 ^ 3 * 2 - (5 * 2)");
+            Assert.AreEqual(574, jswCalculator.EvaluateExpression("(1 + (43+ a7 + 515 + 2) - 35) + (26 + 8)+a7"));
         }
 
         [TestMethod]
@@ -299,6 +294,12 @@ namespace UnitTestProject1
             JswCalculator jswCalculator = new JswCalculator();
             var Tokens = jswCalculator.GetTokens("1+SQRT(16)*2");
             Assert.AreEqual(9m, jswCalculator.EvaluateExpression(Tokens));
+        }
+        [TestMethod]
+        public void TestMethod37()
+        {
+            JswCalculator jswCalculator = new JswCalculator();
+            Assert.AreEqual(28.27433388230811m, jswCalculator.EvaluateExpression("pi*3^2"));
         }
     }
 }

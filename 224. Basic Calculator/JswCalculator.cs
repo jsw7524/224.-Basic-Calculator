@@ -34,6 +34,7 @@ namespace _224.Basic_Calculator
               { "^", new CalFunction { name="^", precedence=3,operandNumber=2,f=tokens=>new Token((decimal)Math.Pow((double)tokens[1].val, (double)tokens[0].val))}},
               { "(", new CalFunction { name="(", precedence=1000,operandNumber=0,f=null} },
               { ")", new CalFunction { name=")", precedence=-1000,operandNumber=0,f=null} },
+              { ",", new CalFunction { name=",", precedence=-1,operandNumber=0,f=null} },//unsupported
               { "=", new CalFunction { name="=", precedence=0,operandNumber=2,f=tokens=>
                                             {
                                                 this.symbolTable[tokens[1].op] =  GetValue(tokens[0]);
@@ -43,9 +44,10 @@ namespace _224.Basic_Calculator
               { "NEG", new CalFunction { name="NEG", precedence=4,operandNumber=1,f=tokens=>new Token(-1*tokens[0].val)} },
               { "ABS", new CalFunction { name="ABS", precedence=4,operandNumber=1,f=tokens=>new Token(Math.Abs(tokens[0].val))} },
               { "SQRT", new CalFunction { name="SQRT", precedence=4,operandNumber=1,f=tokens=>new Token((decimal)Math.Sqrt((double)tokens[0].val))} },
+
             };
             this.tokenPattern = tokenPattern ?? @"(?<val>\d+(\.\d+)?)|(?<op>\+|\-|\*|\\|\(|\)|\^|%|=)|(?<var>[a-z]\w*)|(?<func>[A-Z]+)";
-            this.symbolTable = symbolTable ?? new Dictionary<string, Decimal>();
+            this.symbolTable = symbolTable ?? new Dictionary<string, Decimal>() { { "e", (Decimal)Math.E }, { "pi", (Decimal)Math.PI } };
         }
 
         public List<Token> GetTokens(string input)
@@ -89,7 +91,7 @@ namespace _224.Basic_Calculator
                 return v.val;
             if (v.tkType == TokenType.Var)
                 return symbolTable[v.op];
-            throw new Exception("fail to get value ");
+            throw new Exception("fail to get value");
         }
 
         private void Compute(Token t, Stack<Token> opStack, Stack<Token> valStack)
@@ -101,14 +103,23 @@ namespace _224.Basic_Calculator
             while (opStack.Count > 0 && precedenceTable[t.op].precedence <= precedenceTable[opStack.Peek().op].precedence && (opStack.Peek().op != "("))
             {
                 Token opToken = opStack.Pop();
-                List<Token> parameters = new List<Token>();
-                for (int i=0;i<precedenceTable[opToken.op].operandNumber;i++)
+                if (precedenceTable[opToken.op].f != null)
                 {
-                    parameters.Add(valStack.Pop());
+                    List<Token> parameters = new List<Token>();
+                    for (int i=0;i<precedenceTable[opToken.op].operandNumber;i++)
+                    {
+                        parameters.Add(valStack.Pop());
+                    }
+                    Token result = precedenceTable[opToken.op].f(parameters);
+                    valStack.Push(result);
                 }
-                Token result = precedenceTable[opToken.op].f(parameters);
-                valStack.Push(result);
             }
+        }
+
+        public Decimal EvaluateExpression(string expr)
+        {
+            var Tokens = GetTokens(expr);
+            return EvaluateExpression(Tokens);
         }
 
         public Decimal EvaluateExpression(List<Token> tokens)
