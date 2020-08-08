@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -10,19 +11,19 @@ namespace _224.Basic_Calculator
         private Dictionary<string, int> precedenceTable;
         private string tokenPattern;
         private Dictionary<string, Decimal> symbolTable;
-        public JswCalculator():this(null, null, null){}
+        public JswCalculator() : this(null, null, null) { }
 
         public JswCalculator(Dictionary<string, int> precedenceTable, string tokenPattern, Dictionary<string, decimal> symbolTable)
         {
-            this.precedenceTable = precedenceTable?? new Dictionary<string, int>{{"+",1},{"-",1},{"*",2},{"/",2},{"%",2},{"^",3},{"(",1000},{")",-1000},{"=",0}};
-            this.tokenPattern = tokenPattern?? @"(?<val>\d+(\.\d+)?)|(?<op>\+|\-|\*|\\|\(|\)|\^|%|=)|(?<var>[A-Za-z]\w*)";
-            this.symbolTable = symbolTable??new Dictionary<string, Decimal>();
+            this.precedenceTable = precedenceTable ?? new Dictionary<string, int> { { "+", 1 }, { "-", 1 }, { "*", 2 }, { "/", 2 }, { "%", 2 }, { "^", 3 }, { "(", 1000 }, { ")", -1000 }, { "=", 0 } };
+            this.tokenPattern = tokenPattern ?? @"(?<val>\d+(\.\d+)?)|(?<op>\+|\-|\*|\\|\(|\)|\^|%|=)|(?<var>[A-Za-z]\w*)";
+            this.symbolTable = symbolTable ?? new Dictionary<string, Decimal>();
         }
 
         public List<Token> GetTokens(string input)
         {
             Regex regex = new Regex(tokenPattern);
-            var cleanInput=input.Replace(" ", "");
+            var cleanInput = input.Replace(" ", "");
             var mc = regex.Matches(cleanInput);
             List<Token> result = new List<Token>();
             StringBuilder sb = new StringBuilder();
@@ -35,7 +36,10 @@ namespace _224.Basic_Calculator
                 }
                 else if (m.Groups["var"].Success)
                 {
-                    token = new Token(m.Value,0);
+                    var tmp = 0m;
+                    if (symbolTable.ContainsKey(m.Value))
+                        tmp = symbolTable[m.Value];
+                    token = new Token(m.Value, tmp);
                 }
                 else
                 {
@@ -51,9 +55,8 @@ namespace _224.Basic_Calculator
             return result;
         }
 
-        private Decimal GetValue(Stack<Token> valStack)
+        private Decimal GetValue(Token v)
         {
-            var v = valStack.Pop();
             if (v.tkType == TokenType.Val)
                 return v.val;
             if (v.tkType == TokenType.Var)
@@ -70,38 +73,33 @@ namespace _224.Basic_Calculator
             while (opStack.Count > 0 && precedenceTable[t.op] <= precedenceTable[opStack.Peek().op] && (opStack.Peek().op != "("))
             {
                 Token opToken = opStack.Pop();
-                if (opToken.op == "=")
-                {
-                    var d = GetValue(valStack);
-                    var varToken = valStack.Pop();
-                    var varName = varToken.op;
-                    symbolTable[varName] = d;
-                    varToken.val = d;
-                    valStack.Push(varToken);
-                    return;
-                }
-                Decimal b = GetValue(valStack);
-                Decimal a = GetValue(valStack);
+                Token b = valStack.Pop();
+                Token a = valStack.Pop();
                 switch (opToken.op)
                 {
                     case "+":
-                        valStack.Push(new Token(a + b));
+                        valStack.Push(new Token(GetValue(a) + GetValue(b)));
                         break;
                     case "-":
-                        valStack.Push(new Token(a - b));
+                        valStack.Push(new Token(GetValue(a) - GetValue(b)));
                         break;
                     case "*":
-                        valStack.Push(new Token(a * b));
+                        valStack.Push(new Token(GetValue(a) * GetValue(b)));
                         break;
                     case "/":
-                        valStack.Push(new Token(a / b));
+                        valStack.Push(new Token(GetValue(a) / GetValue(b)));
                         break;
                     case "%":
-                        valStack.Push(new Token(a % b));
+                        valStack.Push(new Token(GetValue(a) % GetValue(b)));
                         break;
                     case "^":
-                        valStack.Push(new Token((decimal)Math.Pow((double)a, (double)b)));
+                        valStack.Push(new Token((decimal)Math.Pow((double)GetValue(a), (double)GetValue(b))));
                         break;
+                    case "=":
+                        symbolTable[a.op] = GetValue(b);
+                        a.val = GetValue(b);
+                        valStack.Push(a);
+                        return;
                 }
             }
         }
@@ -132,7 +130,7 @@ namespace _224.Basic_Calculator
             {
                 Compute(opStack.Peek(), opStack, valStack);
             }
-            return GetValue(valStack);
+            return GetValue(valStack.Pop());
         }
     }
 }
