@@ -11,30 +11,31 @@ namespace UnitTestProject1
         [TestMethod]
         public void TestMethod0()
         {
+            
             JswCalculator jswCalculator = new JswCalculator();
             var Tokens = jswCalculator.GetTokens("1+2^30");
-            Assert.AreEqual(5, Tokens.Count);
+            Assert.AreEqual(5+2, Tokens.Count);//+2 for auto add ( )
         }
         [TestMethod]
         public void TestMethod1()
         {
             JswCalculator jswCalculator = new JswCalculator();
             var result= jswCalculator.GetTokens("(1+43)");
-            Assert.AreEqual(5, result.Count);
+            Assert.AreEqual(5 + 2, result.Count);//+2 for auto add ( )
         }
         [TestMethod]
         public void TestMethod2()
         {
             JswCalculator jswCalculator = new JswCalculator();
             var result = jswCalculator.GetTokens("(1+(43+515 +2)- 35)+( 26 +8)");
-            Assert.AreEqual(19, result.Count);
+            Assert.AreEqual(19 + 2, result.Count);//+2 for auto add( )
         }
         [TestMethod]
         public void TestMethod3()
         {
             JswCalculator jswCalculator = new JswCalculator();
             var result = jswCalculator.GetTokens("1");
-            Assert.AreEqual(1, result.Count);
+            Assert.AreEqual(1 + 2, result.Count);//+2 for auto add( )
         }
 
         [TestMethod]
@@ -221,7 +222,8 @@ namespace UnitTestProject1
               { "-", new CalFunction { name="-", precedence=2,operandNumber=2,f=tokens=>new Token(tokens[1].val-tokens[0].val)} },
               { "*", new CalFunction { name="*", precedence=1,operandNumber=2,f=tokens=>new Token(tokens[1].val*tokens[0].val)} },
               { "/", new CalFunction { name="/", precedence=1,operandNumber=2,f=tokens=>new Token(tokens[1].val/tokens[0].val)} },
-};
+              { "(", new CalFunction { name="(", precedence=1000,operandNumber=0,f=null} },
+              { ")", new CalFunction { name=")", precedence=-1000,operandNumber=0,f=null} },};
             JswCalculator jswCalculator = new JswCalculator(specialPrecedence, null, null);
             var Tokens = jswCalculator.GetTokens("1+2*3+4");
             Assert.AreEqual((1 + 2)*(3+4), jswCalculator.EvaluateExpression(Tokens));
@@ -230,7 +232,7 @@ namespace UnitTestProject1
         [ExpectedException(typeof(Exception))]
         public void TestMethod28()
         {
-            string syntax = @"(?<val>\d+\.\d+)|(?<op>\+|\-|\*|\\|\(|\)|\^|%|=)|(?<var>[A-Za-z]\w*)";
+            string syntax = @"(?<val>\d+\.\d+)|(?<op>\+|\-|\*|\/|\(|\)|\^|%|=)|(?<var>[A-Za-z]\w*)";
             JswCalculator jswCalculator = new JswCalculator(null, syntax, null);
             var Tokens = jswCalculator.GetTokens("1+2*3+4");
             jswCalculator.EvaluateExpression(Tokens);
@@ -238,7 +240,7 @@ namespace UnitTestProject1
         [TestMethod]
         public void TestMethod29()
         {
-            string syntax = @"(?<val>\d+\.\d+)|(?<op>\+|\-|\*|\\|\(|\)|\^|%|=)|(?<var>[A-Za-z]\w*)";
+            string syntax = @"(?<val>\d+\.\d+)|(?<op>\+|\-|\*|\/|\(|\)|\^|%|=)|(?<var>[A-Za-z]\w*)";
             JswCalculator jswCalculator = new JswCalculator(null, syntax, null);
             var Tokens = jswCalculator.GetTokens("1.0+2.0*3.0+4.0");
             Assert.AreEqual(11m, jswCalculator.EvaluateExpression(Tokens));
@@ -248,7 +250,7 @@ namespace UnitTestProject1
         [ExpectedException(typeof(Exception))]
         public void TestMethod30()
         {
-            string syntax = @"(?<val>\d+\.\d+)|(?<op>\+|\-|\*|\\|\(|\)|\^|%|=)|(?<var>[A-Za-z]\w*)";
+            string syntax = @"(?<val>\d+\.\d+)|(?<op>\+|\-|\*|\/|\(|\)|\^|%|=)|(?<var>[A-Za-z]\w*)";
             JswCalculator jswCalculator = new JswCalculator(null, syntax, null);
             var Tokens = jswCalculator.GetTokens("1.0+2.0*3.0+4");
         }

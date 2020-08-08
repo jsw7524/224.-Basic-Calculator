@@ -46,14 +46,14 @@ namespace _224.Basic_Calculator
               { "SQRT", new CalFunction { name="SQRT", precedence=4,operandNumber=1,f=tokens=>new Token((decimal)Math.Sqrt((double)tokens[0].val))} },
 
             };
-            this.tokenPattern = tokenPattern ?? @"(?<val>\d+(\.\d+)?)|(?<op>\+|\-|\*|\\|\(|\)|\^|%|=)|(?<var>[a-z]\w*)|(?<func>[A-Z]+)";
+            this.tokenPattern = tokenPattern ?? @"(?<val>\d+(\.\d+)?)|(?<op>\+|\-|\*|\/|\(|\)|\^|%|=)|(?<var>[a-z]\w*)|(?<func>[A-Z]+)";
             this.symbolTable = symbolTable ?? new Dictionary<string, Decimal>() { { "e", (Decimal)Math.E }, { "pi", (Decimal)Math.PI } };
         }
 
         public List<Token> GetTokens(string input)
         {
             Regex regex = new Regex(tokenPattern);
-            var cleanInput = input.Replace(" ", "");
+            var cleanInput = "("+input.Replace(" ", "")+")";
             var mc = regex.Matches(cleanInput);
             List<Token> result = new List<Token>();
             StringBuilder sb = new StringBuilder();
@@ -126,7 +126,6 @@ namespace _224.Basic_Calculator
         {
             Stack<Token> opStack = new Stack<Token>();
             Stack<Token> valStack = new Stack<Token>();
-
             foreach (Token t in tokens)
             {
                 if (t.tkType == TokenType.OP)
@@ -143,10 +142,6 @@ namespace _224.Basic_Calculator
                 {
                     valStack.Push(t);
                 }
-            }
-            while (opStack.Count > 0)
-            {
-                Compute(opStack.Peek(), opStack, valStack);
             }
             return GetValue(valStack.Pop());
         }
