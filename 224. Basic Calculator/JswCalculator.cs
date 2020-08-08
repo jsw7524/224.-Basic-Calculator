@@ -13,7 +13,6 @@ namespace _224.Basic_Calculator
         public int operandNumber;
         public Func<List<Token>, Token> f;
     }
-    // { { "+", 1 }, { "-", 1 }, { "*", 2 }, { "/", 2 }, { "%", 2 }, { "^", 3 }, { "(", 1000 }, { ")", -1000 }, { "=", 0 } };
 
     public class JswCalculator
     {
@@ -35,7 +34,7 @@ namespace _224.Basic_Calculator
               { "^", new CalFunction { name="^", precedence=3,operandNumber=2,f=tokens=>new Token((decimal)Math.Pow((double)tokens[1].val, (double)tokens[0].val))}},
               { "(", new CalFunction { name="(", precedence=1000,operandNumber=0,f=null} },
               { ")", new CalFunction { name=")", precedence=-1000,operandNumber=0,f=null} },
-              { "=", new CalFunction { name="=", precedence=0,operandNumber=0,f=tokens=>
+              { "=", new CalFunction { name="=", precedence=0,operandNumber=2,f=tokens=>
                                             {
                                                 this.symbolTable[tokens[1].op] =  GetValue(tokens[0]);
                                                 tokens[1].val = GetValue(tokens[0]);
@@ -99,9 +98,12 @@ namespace _224.Basic_Calculator
             while (opStack.Count > 0 && precedenceTable[t.op].precedence <= precedenceTable[opStack.Peek().op].precedence && (opStack.Peek().op != "("))
             {
                 Token opToken = opStack.Pop();
-                Token b = valStack.Pop();
-                Token a = valStack.Pop();
-                Token result = precedenceTable[opToken.op].f(new List<Token> { b, a });
+                List<Token> parameters = new List<Token>();
+                for (int i=0;i<precedenceTable[opToken.op].operandNumber;i++)
+                {
+                    parameters.Add(valStack.Pop());
+                }
+                Token result = precedenceTable[opToken.op].f(parameters);
                 valStack.Push(result);
             }
         }
