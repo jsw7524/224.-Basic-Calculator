@@ -303,5 +303,42 @@ namespace UnitTestProject1
             JswCalculator jswCalculator = new JswCalculator();
             Assert.AreEqual(28.27433388230811m, jswCalculator.EvaluateExpression("pi*3^2"));
         }
+
+        [TestMethod]
+        public void TestMethod38()
+        {
+            JswCalculator jswCalculator = new JswCalculator();
+            Assert.AreEqual(0.0000814939159201454283421497m, jswCalculator.EvaluateExpression("((((19) / 61))) / (65 / 97 * 88 * 75 / 81 * (70))"));
+        }
+
+
+        [TestMethod]
+        public void TestMethod39()
+        {
+            JswCalculator jswCalculator = new JswCalculator();
+            Assert.AreEqual(4.0807828945168009283518119874m, jswCalculator.EvaluateExpression("(59 * 32 + 69 + 72 / 86) / ((15 * 38) + (77) / 100 - 91)"));
+        }
+
+        [TestMethod]
+        public void TestMethod40()
+        {
+            JswCalculator jswCalculator = new JswCalculator();
+            Assert.AreEqual(-37m, jswCalculator.EvaluateExpression("((61) - (((98))))"));
+        }
+
+        [TestMethod]
+        public void TestMethod41()
+        {
+            JswCalculator jswCalculator = new JswCalculator();
+            Assert.AreEqual(-299.68616600790513833992094861m, jswCalculator.EvaluateExpression("(89) - 5 * 63 - (14) / 46 - (86) / (95 - (40)) * 6 - ((64))"));
+        }
+
+        [TestMethod]
+        public void TestMethod42()
+        {
+            JswCalculator jswCalculator = new JswCalculator();
+            Assert.AreEqual(108.94642857142857142857142857m, jswCalculator.EvaluateExpression("93 - 17 + 15 / 4 * ((6)) / (28) * 41"));
+        }
+
     }
 }
