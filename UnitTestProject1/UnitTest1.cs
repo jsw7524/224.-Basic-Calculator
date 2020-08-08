@@ -156,8 +156,8 @@ namespace UnitTestProject1
         {
             JswCalculator jswCalculator = new JswCalculator();
             var Tokens1 = jswCalculator.GetTokens("a=1");
-            var Tokens2 = jswCalculator.GetTokens("2+a");
             jswCalculator.EvaluateExpression(Tokens1);
+            var Tokens2 = jswCalculator.GetTokens("2+a");
             Assert.AreEqual(3, jswCalculator.EvaluateExpression(Tokens2));
         }
 
@@ -166,8 +166,9 @@ namespace UnitTestProject1
         {
             JswCalculator jswCalculator = new JswCalculator();
             var Tokens1 = jswCalculator.GetTokens("a7=1 + 2 ^ 3 * 2 - (5 * 2)");
-            var Tokens2 = jswCalculator.GetTokens("(1 + (43+ a7 + 515 + 2) - 35) + (26 + 8)+a7");
             jswCalculator.EvaluateExpression(Tokens1);
+            var Tokens2 = jswCalculator.GetTokens("(1 + (43+ a7 + 515 + 2) - 35) + (26 + 8)+a7");
+            
             Assert.AreEqual(574, jswCalculator.EvaluateExpression(Tokens2));
         }
 
@@ -176,10 +177,10 @@ namespace UnitTestProject1
         {
             JswCalculator jswCalculator = new JswCalculator();
             var Tokens1 = jswCalculator.GetTokens("a7=1 + 2 ^ 3 * 2 - (5 * 2)");
-            var Tokens2 = jswCalculator.GetTokens("a574=(1 + (43+ a7 + 515 + 2) - 35) + (26 + 8)+a7");
-            var Tokens3 = jswCalculator.GetTokens("a595=a574 + 3*a7");
             jswCalculator.EvaluateExpression(Tokens1);
+            var Tokens2 = jswCalculator.GetTokens("a574=(1 + (43+ a7 + 515 + 2) - 35) + (26 + 8)+a7");
             jswCalculator.EvaluateExpression(Tokens2);
+            var Tokens3 = jswCalculator.GetTokens("a595=a574 + 3*a7");
             Assert.AreEqual(595, jswCalculator.EvaluateExpression(Tokens3));
         }
 
@@ -220,7 +221,12 @@ namespace UnitTestProject1
         [TestMethod]
         public void TestMethod27()
         {
-            Dictionary<string, int> specialPrecedence = new Dictionary<string, int> { { "+", 2 }, { "-", 2 }, { "*", 1 }, { "/", 1 }};
+            Dictionary<string, CalFunction> specialPrecedence = new Dictionary<string, CalFunction> { 
+              { "+", new CalFunction { name="+", precedence=2,operandNumber=2,f=tokens=>new Token(tokens[1].val+tokens[0].val)} },
+              { "-", new CalFunction { name="-", precedence=2,operandNumber=2,f=tokens=>new Token(tokens[1].val-tokens[0].val)} },
+              { "*", new CalFunction { name="*", precedence=1,operandNumber=2,f=tokens=>new Token(tokens[1].val*tokens[0].val)} },
+              { "/", new CalFunction { name="/", precedence=1,operandNumber=2,f=tokens=>new Token(tokens[1].val/tokens[0].val)} },
+};
             JswCalculator jswCalculator = new JswCalculator(specialPrecedence, null, null);
             var Tokens = jswCalculator.GetTokens("1+2*3+4");
             Assert.AreEqual((1 + 2)*(3+4), jswCalculator.EvaluateExpression(Tokens));

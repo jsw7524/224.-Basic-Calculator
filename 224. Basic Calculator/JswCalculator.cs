@@ -6,16 +6,42 @@ using System.Text.RegularExpressions;
 
 namespace _224.Basic_Calculator
 {
+    public class CalFunction
+    {
+        public string name;
+        public int precedence;
+        public int operandNumber;
+        public Func<List<Token>, Token> f;
+    }
+    // { { "+", 1 }, { "-", 1 }, { "*", 2 }, { "/", 2 }, { "%", 2 }, { "^", 3 }, { "(", 1000 }, { ")", -1000 }, { "=", 0 } };
+
     public class JswCalculator
     {
-        private Dictionary<string, int> precedenceTable;
+        private Dictionary<string, CalFunction> precedenceTable;
         private string tokenPattern;
         private Dictionary<string, Decimal> symbolTable;
         public JswCalculator() : this(null, null, null) { }
 
-        public JswCalculator(Dictionary<string, int> precedenceTable, string tokenPattern, Dictionary<string, decimal> symbolTable)
+        public JswCalculator(Dictionary<string, CalFunction> precedenceTable, string tokenPattern, Dictionary<string, decimal> symbolTable)
         {
-            this.precedenceTable = precedenceTable ?? new Dictionary<string, int> { { "+", 1 }, { "-", 1 }, { "*", 2 }, { "/", 2 }, { "%", 2 }, { "^", 3 }, { "(", 1000 }, { ")", -1000 }, { "=", 0 } };
+            //tokens[0] is b
+            //tokens[1] is a
+            this.precedenceTable = precedenceTable ?? new Dictionary<string, CalFunction>
+            { { "+", new CalFunction { name="+", precedence=1,operandNumber=2,f=tokens=>new Token(tokens[1].val+tokens[0].val)} },
+              { "-", new CalFunction { name="-", precedence=1,operandNumber=2,f=tokens=>new Token(tokens[1].val-tokens[0].val)} },
+              { "*", new CalFunction { name="*", precedence=2,operandNumber=2,f=tokens=>new Token(tokens[1].val*tokens[0].val)} },
+              { "/", new CalFunction { name="/", precedence=2,operandNumber=2,f=tokens=>new Token(tokens[1].val/tokens[0].val)} },
+              { "%", new CalFunction { name="%", precedence=2,operandNumber=2,f=tokens=>new Token(tokens[1].val%tokens[0].val)} },
+              { "^", new CalFunction { name="^", precedence=3,operandNumber=2,f=tokens=>new Token((decimal)Math.Pow((double)tokens[1].val, (double)tokens[0].val))}},
+              { "(", new CalFunction { name="(", precedence=1000,operandNumber=0,f=null} },
+              { ")", new CalFunction { name=")", precedence=-1000,operandNumber=0,f=null} },
+              { "=", new CalFunction { name="=", precedence=0,operandNumber=0,f=tokens=>
+                                            {
+                                                this.symbolTable[tokens[1].op] =  GetValue(tokens[0]);
+                                                tokens[1].val = GetValue(tokens[0]);
+                                                return tokens[1];
+                                            }  } },
+            };
             this.tokenPattern = tokenPattern ?? @"(?<val>\d+(\.\d+)?)|(?<op>\+|\-|\*|\\|\(|\)|\^|%|=)|(?<var>[A-Za-z]\w*)";
             this.symbolTable = symbolTable ?? new Dictionary<string, Decimal>();
         }
@@ -70,37 +96,13 @@ namespace _224.Basic_Calculator
                 return;
             if (valStack.Count == 0)
                 return;
-            while (opStack.Count > 0 && precedenceTable[t.op] <= precedenceTable[opStack.Peek().op] && (opStack.Peek().op != "("))
+            while (opStack.Count > 0 && precedenceTable[t.op].precedence <= precedenceTable[opStack.Peek().op].precedence && (opStack.Peek().op != "("))
             {
                 Token opToken = opStack.Pop();
                 Token b = valStack.Pop();
                 Token a = valStack.Pop();
-                switch (opToken.op)
-                {
-                    case "+":
-                        valStack.Push(new Token(GetValue(a) + GetValue(b)));
-                        break;
-                    case "-":
-                        valStack.Push(new Token(GetValue(a) - GetValue(b)));
-                        break;
-                    case "*":
-                        valStack.Push(new Token(GetValue(a) * GetValue(b)));
-                        break;
-                    case "/":
-                        valStack.Push(new Token(GetValue(a) / GetValue(b)));
-                        break;
-                    case "%":
-                        valStack.Push(new Token(GetValue(a) % GetValue(b)));
-                        break;
-                    case "^":
-                        valStack.Push(new Token((decimal)Math.Pow((double)GetValue(a), (double)GetValue(b))));
-                        break;
-                    case "=":
-                        symbolTable[a.op] = GetValue(b);
-                        a.val = GetValue(b);
-                        valStack.Push(a);
-                        return;
-                }
+                Token result = precedenceTable[opToken.op].f(new List<Token> { b, a });
+                valStack.Push(result);
             }
         }
 
