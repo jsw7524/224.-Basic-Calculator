@@ -45,7 +45,7 @@ namespace _224.Basic_Calculator
         public List<Token> GetTokens(string input)
         {
             Regex regex = new Regex(tokenPattern);
-            var cleanInput = "("+input.Replace(" ", "")+")";
+            var cleanInput = "(" + input.Replace(" ", "") + ")";
             var mc = regex.Matches(cleanInput);
             List<Token> result = new List<Token>();
             StringBuilder sb = new StringBuilder();
@@ -98,7 +98,7 @@ namespace _224.Basic_Calculator
                 if (precedenceTable[opToken.op].f != null)
                 {
                     List<Token> parameters = new List<Token>();
-                    for (int i=0;i<precedenceTable[opToken.op].operandNumber;i++)
+                    for (int i = 0; i < precedenceTable[opToken.op].operandNumber; i++)
                     {
                         parameters.Add(valStack.Pop());
                     }
@@ -118,6 +118,7 @@ namespace _224.Basic_Calculator
         {
             Stack<Token> opStack = new Stack<Token>();
             Stack<Token> valStack = new Stack<Token>();
+            valStack.Push(new Token(0m));
             foreach (Token t in tokens)
             {
                 if (t.tkType == TokenType.OP)

@@ -339,6 +339,37 @@ namespace UnitTestProject1
             JswCalculator jswCalculator = new JswCalculator();
             Assert.AreEqual(108.94642857142857142857142857m, jswCalculator.EvaluateExpression("93 - 17 + 15 / 4 * ((6)) / (28) * 41"));
         }
+        [TestMethod]
+        public void TestMethod43()
+        {
+            JswCalculator jswCalculator = new JswCalculator();
+            Assert.AreEqual(0m, jswCalculator.EvaluateExpression("0"));
+        }
+        [TestMethod]
+        public void TestMethod44()
+        {
+            JswCalculator jswCalculator = new JswCalculator();
+            Assert.AreEqual(7m, jswCalculator.EvaluateExpression("7"));
+        }
+
+        [TestMethod]
+        public void TestMethod45()
+        {
+            JswCalculator jswCalculator = new JswCalculator();
+            Assert.AreEqual(-3m, jswCalculator.EvaluateExpression("-3"));
+        }
+        [TestMethod]
+        public void TestMethod46()
+        {
+            JswCalculator jswCalculator = new JswCalculator();
+            Assert.AreEqual(-10m, jswCalculator.EvaluateExpression("-3-7"));
+        }
+        [TestMethod]
+        public void TestMethod47()
+        {
+            JswCalculator jswCalculator = new JswCalculator();
+            Assert.AreEqual(-4m, jswCalculator.EvaluateExpression("-3-(1))"));
+        }
 
     }
 }
