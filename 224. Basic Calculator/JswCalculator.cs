@@ -41,6 +41,9 @@ namespace _224.Basic_Calculator
             };
             this.tokenPattern = tokenPattern ?? @"(?<val>\d+(\.\d+)?)|(?<op>\+|\-|\*|\/|\(|\)|\^|%|=)|(?<var>[a-z]\w*)|(?<func>[A-Z]+)"; //variable is lowercase, function is uppercase.
             this.symbolTable = symbolTable ?? new Dictionary<string, Decimal>() { { "e", (Decimal)Math.E }, { "pi", (Decimal)Math.PI } };
+
+            customizingVariable = name => 0m;
+
         }
 
         public List<Token> GetTokens(string input)
