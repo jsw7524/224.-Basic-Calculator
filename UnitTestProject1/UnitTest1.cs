@@ -11,16 +11,16 @@ namespace UnitTestProject1
         [TestMethod]
         public void TestMethod0()
         {
-            
+
             JswCalculator jswCalculator = new JswCalculator();
             var Tokens = jswCalculator.GetTokens("1+2^30");
-            Assert.AreEqual(5+2, Tokens.Count);//+2 for auto add ( )
+            Assert.AreEqual(5 + 2, Tokens.Count);//+2 for auto add ( )
         }
         [TestMethod]
         public void TestMethod1()
         {
             JswCalculator jswCalculator = new JswCalculator();
-            var result= jswCalculator.GetTokens("(1+43)");
+            var result = jswCalculator.GetTokens("(1+43)");
             Assert.AreEqual(5 + 2, result.Count);//+2 for auto add ( )
         }
         [TestMethod]
@@ -208,8 +208,8 @@ namespace UnitTestProject1
         [TestMethod]
         public void TestMethod26()
         {
-            Dictionary<string, decimal> saved = new Dictionary<string, decimal> { {"a",1.1m } };
-            JswCalculator jswCalculator = new JswCalculator(null,null, saved);
+            Dictionary<string, decimal> saved = new Dictionary<string, decimal> { { "a", 1.1m } };
+            JswCalculator jswCalculator = new JswCalculator(null, null, saved);
             var Tokens = jswCalculator.GetTokens("2+a");
             Assert.AreEqual(3.1m, jswCalculator.EvaluateExpression(Tokens));
         }
@@ -217,16 +217,16 @@ namespace UnitTestProject1
         [TestMethod]
         public void TestMethod27()
         {
-            Dictionary<string, CalFunction> specialPrecedence = new Dictionary<string, CalFunction> { 
-              { "+", new CalFunction { name="+", precedence=2,operandNumber=2,f=tokens=>new Token(tokens[1].val+tokens[0].val)} },
-              { "-", new CalFunction { name="-", precedence=2,operandNumber=2,f=tokens=>new Token(tokens[1].val-tokens[0].val)} },
-              { "*", new CalFunction { name="*", precedence=1,operandNumber=2,f=tokens=>new Token(tokens[1].val*tokens[0].val)} },
-              { "/", new CalFunction { name="/", precedence=1,operandNumber=2,f=tokens=>new Token(tokens[1].val/tokens[0].val)} },
-              { "(", new CalFunction { name="(", precedence=1000,operandNumber=0,f=null} },
-              { ")", new CalFunction { name=")", precedence=-1000,operandNumber=0,f=null} },};
+            Dictionary<string, OperatorFunction> specialPrecedence = new Dictionary<string, OperatorFunction> {
+              { "+", new OperatorFunction { name="+", precedence=2,operandNumber=2,f=tokens=>new Token(tokens[1].val+tokens[0].val)} },
+              { "-", new OperatorFunction { name="-", precedence=2,operandNumber=2,f=tokens=>new Token(tokens[1].val-tokens[0].val)} },
+              { "*", new OperatorFunction { name="*", precedence=1,operandNumber=2,f=tokens=>new Token(tokens[1].val*tokens[0].val)} },
+              { "/", new OperatorFunction { name="/", precedence=1,operandNumber=2,f=tokens=>new Token(tokens[1].val/tokens[0].val)} },
+              { "(", new OperatorFunction { name="(", precedence=1000,operandNumber=0,f=null} },
+              { ")", new OperatorFunction { name=")", precedence=-1000,operandNumber=0,f=null} },};
             JswCalculator jswCalculator = new JswCalculator(specialPrecedence, null, null);
             var Tokens = jswCalculator.GetTokens("1+2*3+4");
-            Assert.AreEqual((1 + 2)*(3+4), jswCalculator.EvaluateExpression(Tokens));
+            Assert.AreEqual((1 + 2) * (3 + 4), jswCalculator.EvaluateExpression(Tokens));
         }
         [TestMethod]
         [ExpectedException(typeof(Exception))]
@@ -369,6 +369,62 @@ namespace UnitTestProject1
         {
             JswCalculator jswCalculator = new JswCalculator();
             Assert.AreEqual(-4m, jswCalculator.EvaluateExpression("-3-(1))"));
+        }
+
+        [TestMethod]
+        public void TestMethod48()
+        {
+            JswCalculator jswCalculator = new JswCalculator();
+            jswCalculator.customizingVariable = name => { return "myvar" == name ? 7524m : 0m; };
+            Assert.AreEqual(7529m, jswCalculator.EvaluateExpression("5+myvar"));
+        }
+
+        [TestMethod]
+        public void TestMethod49()
+        {
+            JswCalculator jswCalculator = new JswCalculator();
+            jswCalculator.customizingVariable = name => { return "notmyvar" == name ? 7524m : 0m; };
+            Assert.AreEqual(5m, jswCalculator.EvaluateExpression("5+myvar"));
+        }
+
+        Dictionary<string, string> tables = new Dictionary<string, string>() { { "t1", "3+t2-t4" }, { "t2", "8+t3" }, { "t3", "100" }, { "t4", "50" } };
+
+        private decimal RecursiveCustomizingVariable(string name)
+        {
+            if (tables.ContainsKey(name))
+            {
+                decimal r = 0m;
+                if (decimal.TryParse(tables[name], out r))
+                {
+                    return r;
+                }
+                else
+                {
+                    JswCalculator tmpCalculator = new JswCalculator();
+                    tmpCalculator.customizingVariable = RecursiveCustomizingVariable;
+                    r = tmpCalculator.EvaluateExpression(tables[name]);
+                    return r;
+                }
+            }
+            return 0m;
+        }
+
+        [TestMethod]
+        public void TestMethod50()
+        {
+
+            JswCalculator jswCalculator = new JswCalculator();
+            jswCalculator.customizingVariable = RecursiveCustomizingVariable;
+            Assert.AreEqual(65m, jswCalculator.EvaluateExpression("4+t1"));
+        }
+
+        [TestMethod]
+        public void TestMethod51()
+        {
+
+            JswCalculator jswCalculator = new JswCalculator();
+            jswCalculator.customizingVariable = RecursiveCustomizingVariable;
+            Assert.AreEqual(3721m, jswCalculator.EvaluateExpression("t3+t1*t1-2*t4"));
         }
 
     }

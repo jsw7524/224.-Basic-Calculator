@@ -8,37 +8,38 @@ namespace _224.Basic_Calculator
 {
     public class JswCalculator
     {
-        private Dictionary<string, CalFunction> precedenceTable;
+        private Dictionary<string, OperatorFunction> precedenceTable;
         private string tokenPattern;
         private Dictionary<string, Decimal> symbolTable;
+        public Func<string, decimal> customizingVariable;
         public JswCalculator() : this(null, null, null) { }
 
-        public JswCalculator(Dictionary<string, CalFunction> precedenceTable, string tokenPattern, Dictionary<string, decimal> symbolTable)
+        public JswCalculator(Dictionary<string, OperatorFunction> precedenceTable, string tokenPattern, Dictionary<string, decimal> symbolTable)
         {
             //tokens[0] is b
             //tokens[1] is a
-            this.precedenceTable = precedenceTable ?? new Dictionary<string, CalFunction>
-            { { "+", new CalFunction { name="+", precedence=1,operandNumber=2,f=tokens=>new Token(tokens[1].val+tokens[0].val)} },
-              { "-", new CalFunction { name="-", precedence=1,operandNumber=2,f=tokens=>new Token(tokens[1].val-tokens[0].val)} },
-              { "*", new CalFunction { name="*", precedence=2,operandNumber=2,f=tokens=>new Token(tokens[1].val*tokens[0].val)} },
-              { "/", new CalFunction { name="/", precedence=2,operandNumber=2,f=tokens=>new Token(tokens[1].val/tokens[0].val)} },
-              { "%", new CalFunction { name="%", precedence=2,operandNumber=2,f=tokens=>new Token(tokens[1].val%tokens[0].val)} },
-              { "^", new CalFunction { name="^", precedence=3,operandNumber=2,f=tokens=>new Token((decimal)Math.Pow((double)tokens[1].val, (double)tokens[0].val))}},
-              { "(", new CalFunction { name="(", precedence=1000,operandNumber=0,f=null} },
-              { ")", new CalFunction { name=")", precedence=-1000,operandNumber=0,f=null} },
-              { ",", new CalFunction { name=",", precedence=-1,operandNumber=0,f=null} },//unsupported
-              { "=", new CalFunction { name="=", precedence=0,operandNumber=2,f=tokens=>
+            this.precedenceTable = precedenceTable ?? new Dictionary<string, OperatorFunction>
+            { { "+", new OperatorFunction { name="+", precedence=1,operandNumber=2,f=tokens=>new Token(tokens[1].val+tokens[0].val)} },
+              { "-", new OperatorFunction { name="-", precedence=1,operandNumber=2,f=tokens=>new Token(tokens[1].val-tokens[0].val)} },
+              { "*", new OperatorFunction { name="*", precedence=2,operandNumber=2,f=tokens=>new Token(tokens[1].val*tokens[0].val)} },
+              { "/", new OperatorFunction { name="/", precedence=2,operandNumber=2,f=tokens=>new Token(tokens[1].val/tokens[0].val)} },
+              { "%", new OperatorFunction { name="%", precedence=2,operandNumber=2,f=tokens=>new Token(tokens[1].val%tokens[0].val)} },
+              { "^", new OperatorFunction { name="^", precedence=3,operandNumber=2,f=tokens=>new Token((decimal)Math.Pow((double)tokens[1].val, (double)tokens[0].val))}},
+              { "(", new OperatorFunction { name="(", precedence=1000,operandNumber=0,f=null} },
+              { ")", new OperatorFunction { name=")", precedence=-1000,operandNumber=0,f=null} },
+              { ",", new OperatorFunction { name=",", precedence=-1,operandNumber=0,f=null} },//unsupported
+              { "=", new OperatorFunction { name="=", precedence=0,operandNumber=2,f=tokens=>
                                             {
                                                 this.symbolTable[tokens[1].op] =  GetValue(tokens[0]);
                                                 tokens[1].val = GetValue(tokens[0]);
                                                 return tokens[1];
                                             }  } },
-              { "NEG", new CalFunction { name="NEG", precedence=4,operandNumber=1,f=tokens=>new Token(-1*tokens[0].val)} },
-              { "ABS", new CalFunction { name="ABS", precedence=4,operandNumber=1,f=tokens=>new Token(Math.Abs(tokens[0].val))} },
-              { "SQRT", new CalFunction { name="SQRT", precedence=4,operandNumber=1,f=tokens=>new Token((decimal)Math.Sqrt((double)tokens[0].val))} },
+              { "NEG", new OperatorFunction { name="NEG", precedence=4,operandNumber=1,f=tokens=>new Token(-1*tokens[0].val)} },
+              { "ABS", new OperatorFunction { name="ABS", precedence=4,operandNumber=1,f=tokens=>new Token(Math.Abs(tokens[0].val))} },
+              { "SQRT", new OperatorFunction { name="SQRT", precedence=4,operandNumber=1,f=tokens=>new Token((decimal)Math.Sqrt((double)tokens[0].val))} },
 
             };
-            this.tokenPattern = tokenPattern ?? @"(?<val>\d+(\.\d+)?)|(?<op>\+|\-|\*|\/|\(|\)|\^|%|=)|(?<var>[a-z]\w*)|(?<func>[A-Z]+)";
+            this.tokenPattern = tokenPattern ?? @"(?<val>\d+(\.\d+)?)|(?<op>\+|\-|\*|\/|\(|\)|\^|%|=)|(?<var>[a-z]\w*)|(?<func>[A-Z]+)"; //variable is lowercase, function is uppercase.
             this.symbolTable = symbolTable ?? new Dictionary<string, Decimal>() { { "e", (Decimal)Math.E }, { "pi", (Decimal)Math.PI } };
         }
 
@@ -60,7 +61,13 @@ namespace _224.Basic_Calculator
                 {
                     var tmp = 0m;
                     if (symbolTable.ContainsKey(m.Value))
+                    {
                         tmp = symbolTable[m.Value];
+                    }
+                    else
+                    {
+                        tmp = customizingVariable(m.Value);
+                    }
                     token = new Token(m.Value, tmp);
                 }
                 else
